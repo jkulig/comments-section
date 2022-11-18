@@ -1,10 +1,9 @@
 <script>
     import Button from './Button.svelte';
     import Icon from './Icon.svelte';
-    import { comments, action } from './stores';
+    import { comments, user, action } from './stores';
 
     export let comment;
-    export let user;
 
     function reply() {
         action.setAction('replying', comment.id);
@@ -21,7 +20,7 @@
 </script>
 
 <div class={$$props.class}>
-    {#if user.username === comment.user.username}
+    {#if $user.username === comment.author.username}
         <div class="flex space-x-4">
             <Button type="link-delete" clickHandler={deleteItem}><Icon name="delete" class="w-3.5 h-3.5 inline-block mr-1.5"></Icon>Delete</Button>
             <Button type="link" clickHandler={editItem}><Icon name="edit" class="w-3.5 h-3.5 inline-block mr-1.5"></Icon>Edit</Button>

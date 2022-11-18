@@ -3,11 +3,10 @@
     import { comments } from './stores';
 
     export let comment;
-    export let user;
 </script>
 
-{#if comment.type === "parent"}
-  <Comment comment={comment} user={user} reply={false}></Comment>
+{#if !comment.parent}
+  <Comment comment={comment} reply={false}></Comment>
 {/if}
 
 {#if comments.getReplies(comment.id).length}
@@ -17,7 +16,7 @@
     </div>
     <div class="flex flex-col w-full space-y-4">
         {#each comments.getReplies(comment.id) as reply}
-          <Comment comment={comments.getComment(reply)} user={user} reply={true}></Comment>
+          <Comment comment={comments.getComment(reply)} reply={true}></Comment>
         {/each}
     </div>
   </div>

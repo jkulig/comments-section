@@ -20,6 +20,8 @@
     "vite": "^3.0.7"
   },
   "dependencies": {
+    "graphql": "^16.6.0",
+    "graphql-request": "^5.0.0",
     "short-unique-id": "^4.4.4"
   }
 }

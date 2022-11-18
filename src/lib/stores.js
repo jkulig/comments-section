@@ -1,7 +1,47 @@
-import { writable } from 'svelte/store';
-import data from '../data.json';
 
-let commentsData = data.comments;
+import { GraphQLClient, gql } from "graphql-request";
+import { writable } from 'svelte/store';
+
+let appData;
+
+// let commentsData = [];
+async function load() {
+    const endpoint = 'https://api-us-east-1.hygraph.com/v2/cl711843e23ds01t89xxebyyr/master';
+    const client = new GraphQLClient(endpoint, { headers: {} });
+    const query = gql`
+{
+    comments {
+        content
+        createdAt
+        id
+        score
+        parent {
+            id
+        }
+        rt {
+            username
+        }
+        author {
+            username
+            avatar {
+                url
+            }
+        }
+    }
+    author(where: {username: "juliusomo"}) {
+        id
+        username
+        avatar {
+            url
+        }
+    }
+}
+`
+
+    const data = await client.request(query);
+    appData = data;
+};
+
 
 function createComments() {
     const { subscribe, update, set } = writable([]);
@@ -21,7 +61,7 @@ function createComments() {
     }
 
     function initComments() {
-        return set(commentsData);
+        return set(appData.comments);
     }
 
     function getComment(commId) {
@@ -30,23 +70,23 @@ function createComments() {
         )[0];
     }
 
+    function getCommentProp(commId, prop) {
+        const comment = getComment(commId);
+
+        return comment[this.props.first];
+    }
+
     function getReplies(commId) {
         let replies = [];
-        stack.forEach(
+        appData.comments.forEach(
             comment => {
-                if (comment.parentId && comment.parentId === commId) {
+                if (comment.parent && comment.parent.id === commId) {
                     replies.push(comment.id);
                 }
             }
         )
 
         return replies;
-    }
-
-    function getCommentProp(commId, prop) {
-        const comment = getComment(commId);
-
-        return comment[this.props.first];
     }
 
     function addComment(newComment) {
@@ -73,11 +113,24 @@ function createComments() {
         subscribe,
         initComments,
         getComment,
+        getReplies,
         addComment,
         deleteComment,
         updateComment,
-        getReplies,
         getCommentProp
+    }
+}
+
+function createUser() {
+    const { subscribe, set } = writable(null);
+
+    function setCurrentUser() {
+        return set(appData.author);
+    }
+
+    return {
+        subscribe,
+        setCurrentUser
     }
 }
 
@@ -102,5 +155,7 @@ function createAction() {
     }
 }
 
+export const loadData = load();
 export const comments = createComments();
+export const user = createUser();
 export const action = createAction();
