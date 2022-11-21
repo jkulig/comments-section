@@ -32,21 +32,20 @@
         }
 
         comments.addComment({
-            // TODO: create mutation to update comments on backend
-            // id: generateUID(),
-            // content: content,
-            // createdAt: "now",
-            // score: 0,
-            // voted: true,
-            // user: {
-            //     image: {
-            //         webp: user.avatar.url
-            //     },
-            //     username: user.username
-            // },
-            // type: replying() ? "child" : "parent",
-            // parentId: replying() ? $action.commentId : null,
-            // rt: rtUser || null
+            id: generateUID(),
+            content: content,
+            createdAt: Date.now(),
+            score: 0,
+            author: {
+                avatar: {
+                    url: $user.avatar.url
+                },
+                username: $user.username
+            },
+            parent: replying() ? { id: $action.commentId } : null,
+            rt: {
+                username: rtUser || null
+            }
         });
 
         content = '';

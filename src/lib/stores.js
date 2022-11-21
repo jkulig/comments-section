@@ -76,19 +76,6 @@ function createComments() {
         return comment[this.props.first];
     }
 
-    function getReplies(commId) {
-        let replies = [];
-        appData.comments.forEach(
-            comment => {
-                if (comment.parent && comment.parent.id === commId) {
-                    replies.push(comment.id);
-                }
-            }
-        )
-
-        return replies;
-    }
-
     function addComment(newComment) {
         return update(
             comments => [...comments, newComment]
@@ -113,7 +100,6 @@ function createComments() {
         subscribe,
         initComments,
         getComment,
-        getReplies,
         addComment,
         deleteComment,
         updateComment,
