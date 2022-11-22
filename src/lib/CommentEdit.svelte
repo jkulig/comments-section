@@ -1,17 +1,45 @@
 <script>
+    import { GraphQLClient, gql } from "graphql-request";
     import Button from './Button.svelte';
     import { comments, action } from './stores';
 
     export let comment;
-
     let commentContent = comment.content;
 
     $: content = commentContent;
 
+    async function postComment() {
+        const endpoint = import.meta.env.VITE_HG_ENDPOINT;
+        const token = import.meta.env.VITE_HG_TOKEN;
+        const client = new GraphQLClient(endpoint, { headers: {
+            authorization: `Bearer ${token}`
+        } });
+
+        const mutation = gql`
+            mutation {
+                updateComment(
+                    where: {
+                        id: "${comment.id}"
+                    }
+                    data: {
+                        content: "${content}"
+                    }
+                ) {
+                    id
+                }
+            }
+        `
+
+        const data = await client.request(mutation);
+        return data.updateComment;
+    }
+
     function updateComment() {
         comments.updateComment(comment.id, 'content', content);
 
-        action.reset();
+        postComment().then(() => {
+            action.reset();
+        }).catch(error => console.log(error));
     }
 </script>
 

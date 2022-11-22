@@ -8,8 +8,6 @@
     let content;
     let comment;
     let rtUser;
-    let mutation;
-    let mutationResult;
 
     function replying() {
         return $action && $action.type === 'replying';
@@ -22,26 +20,31 @@
             return;
         }
 
-        comments.addComment({
-            id: mutationResult.id,
-            content: content,
-            createdAt: mutationResult.createdAt,
-            score: 0,
-            author: {
-                avatar: {
-                    url: $user.avatar.url
+        postComment().then(response => {
+            console.log(response);
+
+            comments.addComment({
+                id: response.id,
+                content: content,
+                createdAt: response.createdAt,
+                score: 0,
+                author: {
+                    avatar: {
+                        url: $user.avatar.url
+                    },
+                    username: $user.username
                 },
-                username: $user.username
-            },
-            parent: replying() ? { id: $action.commentId } : null,
-            rt: {
-                username: rtUser || null
-            }
-        });
+                parent: replying() ? { id: $action.commentId } : null,
+                rt: {
+                    username: rtUser || null
+                }
+            });
 
-        content = '';
+            content = '';
 
-        action.reset();
+            action.reset();
+        }).catch(error => console.log(error));
+
     }
 
     async function postComment() {
@@ -50,6 +53,8 @@
         const client = new GraphQLClient(endpoint, { headers: {
             authorization: `Bearer ${token}`
         } });
+
+        let mutation;
 
         if (replying()) {
             comment = comments.getComment($action.commentId);
@@ -100,12 +105,7 @@
         }
 
         const data = await client.request(mutation);
-        mutationResult = data.createComment;
-
-        if (mutationResult) {
-            console.log('mutation result', mutationResult);
-            createComment();
-        }
+        return data.createComment;
 };
 </script>
 
@@ -113,6 +113,6 @@
     <textarea class="w-full h-20 py-2 px-6 mb-4 border border-gray-500 rounded-md sm:order-2 appearance-none" placeholder="Add a comment..." bind:value={content}></textarea>
     <img class="block w-8 h-8 sm:w-10 sm:h-10 sm:order-1" src={$user.avatar.url} alt={$user.username} width="50" height="50">
     <span class="sm:order-3">
-        <Button type="primary" clickHandler={postComment}>Send</Button>
+        <Button type="primary" clickHandler={createComment}>Send</Button>
     </span>
 </div>

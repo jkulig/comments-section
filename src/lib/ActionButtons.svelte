@@ -1,4 +1,5 @@
 <script>
+    import { GraphQLClient, gql } from "graphql-request";
     import Button from './Button.svelte';
     import Icon from './Icon.svelte';
     import { comments, user, action } from './stores';
@@ -10,11 +11,35 @@
     }
 
     function deleteItem() {
-        comments.deleteComment(comment.id);
+        postComment().then(() => {
+            comments.deleteComment(comment.id);
+        }).catch(error => console.error(error));
     }
 
     function editItem() {
         action.setAction('editing', comment.id);
+    }
+
+    async function postComment() {
+        const endpoint = import.meta.env.VITE_HG_ENDPOINT;
+        const token = import.meta.env.VITE_HG_TOKEN;
+        const client = new GraphQLClient(endpoint, { headers: {
+            authorization: `Bearer ${token}`
+        } });
+
+        const mutation = gql`
+            mutation {
+                deleteComment(
+                    where: {
+                        id: "${comment.id}"
+                    }
+                ) {
+                    id
+                }
+            }
+        `
+        const data = await client.request(mutation);
+        return data.deleteComment;
     }
 
 </script>
