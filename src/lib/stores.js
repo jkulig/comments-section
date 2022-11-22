@@ -6,7 +6,7 @@ let appData;
 
 // let commentsData = [];
 async function load() {
-    const endpoint = 'https://api-us-east-1.hygraph.com/v2/cl711843e23ds01t89xxebyyr/master';
+    const endpoint = import.meta.env.VITE_HG_ENDPOINT;
     const client = new GraphQLClient(endpoint, { headers: {} });
     const query = gql`
 {
